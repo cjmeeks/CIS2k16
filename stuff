@@ -1,0 +1,22 @@
+printf("directoryreadin\n");
+        	//char *filename;
+         	//filename = &dent->d_name;
+        	//printf(dent->d_name);
+		printf("hi");
+		ptr=fopen("hungarian.txt","r");
+          	if(ptr == NULL)
+            	{
+		    printf("well shit");
+		    continue;
+            	}
+		
+          	    printf("fileopened\n");
+                    char word[30];
+                    while(fgets(word, 30, ptr) != NULL)
+                    {
+                        printf("yolo\n");
+                        AddToTree(word, &ROOT, dent->d_name);//AddToTree(...,...,...);
+                    }
+		
+                 fclose(ptr);
+                 printf("\t DIRECTORY\n");

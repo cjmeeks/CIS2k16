@@ -1,0 +1,121 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <errno.h>
+
+#define SLEEP_TIME   500000
+pid_t  	parent;
+pid_t child;
+
+static char *G_signames[] = {"NONE",
+                         	"SIGHUP",
+                         	"SIGINT",
+                         	"SIGQUIT",
+                         	"SIGILL",
+                         	"SIGTRAP",
+                         	"SIGABRT",
+                         	"SIGEMT",
+                         	"SIGFPE",
+                         	"SIGKILL",
+                         	"SIGBUS",
+                         	"SIGSEGV",
+                         	"SIGSYS",
+                         	"SIGPIPE",
+                         	"SIGALRM",
+                         	"SIGTERM",
+                         	"SIGURG",
+                         	"SIGCHLD",
+                         	"SIGTSTP",
+                         	"SIGCONT",
+                         	"SIGCHLD",
+                         	"SIGTTIN",
+                         	"SIGTTOU",
+                         	"SIGIO",
+                         	"SIGXCPU",
+                         	"SIGXFSZ",
+                         	"SIGVTALRM",
+                         	"SIGPROF",
+                         	"SIGWINCH",
+                         	"SIGINFO",
+                         	"SIGUSR1",
+                         	"SIGUSR2",
+                         	NULL};
+
+void handler(int sig) {
+	if (sig > 0 && sig < 32) {
+   	printf("%d has received signal %d (%s)\n",
+           	getpid(),
+           	sig, G_signames[sig]);
+
+    
+	} else {
+   	printf("%d Invalid signal %d\n",
+          	getpid(),
+          	sig);
+	}
+}
+
+void fork_this()
+{
+     pid_t  	pid;
+    pid = fork();
+    if(pid == 0){
+   	 parent = getpid();
+   	 child = pid;
+    }
+    else if(pid !=0){
+   	 child = getpid();
+   	 parent = getppid();
+    }
+
+}
+int main() {
+	int    	nap = SLEEP_TIME;
+	time_t 	now;
+	struct tm *t;
+	int    	remains = 0;
+	int    	sig;
+	char   	whoami[50];
+	pid_t  	pid;
+	int  temp;
+
+	for (sig = 1; sig < 32; sig++) {
+  	(void)signal(sig, handler);
+	}
+	fork_this();
+	sprintf(whoami, "parent (%d)", getpid());
+    
+	//if (pid == 0) {
+	//  sprintf(whoami, "child (%d)", getpid());
+	//}
+	while (1) {
+    
+    if(child == getpid()){
+   	 temp = kill(parent, 0);
+   	 if(temp == -1){
+   		 fork_this();
+   	 }
+   	 else{
+   		 usleep(SLEEP_TIME);
+   	 }    
+    }
+    else{
+   	 if (remains == 0) {
+     		 now = time(NULL);
+     		 t = localtime(&now);
+     		 printf("%s %02d:%02d:%02d beep!\n",
+              	whoami,
+              	t->tm_hour, t->tm_min, t->tm_sec);
+     		 remains = usleep(nap);
+      
+    	}
+   	 else {
+   	   remains = usleep(remains - 100000);
+   	 }
+    }
+  	 
+	}
+	return 0;
+}
+
